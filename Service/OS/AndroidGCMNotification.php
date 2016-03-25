@@ -133,23 +133,20 @@ class AndroidGCMNotification implements OSNotificationServiceInterface
         }
 
         // Determine success
+        $errorResponse = array();
         foreach ($this->responses as $response) {
             $message = json_decode($response->getContent());
             if ($message === null || $message->success == 0 || $message->failure > 0) {
                 if ($message == null) {
-                    $this->logger->error($response->getContent());
+                    $this->logger->err($response->getContent());
                 } else {
-                    foreach ($message->results as $result) {
-                        if (isset($result->error)) {
-                            $this->logger->error($result->error);
-                        }
-                    }
+                    $this->logger->err($message->failure);
                 }
-                return false;
+                $errorResponse[] = $response;
             }
         }
 
-        return true;
+        return $errorResponse;
     }
 
     /**
